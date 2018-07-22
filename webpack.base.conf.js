@@ -1,8 +1,9 @@
 //配置文件
 const path = require("path");
 const webpack = require('webpack');
-// const CleanWebpackPlugin = require('clean-webpack-plugin');
-// const MiniCssExtractPlugin = require("mini-css-extract-plugin"); //CSS文件单独提取出来
+const CleanWebpackPlugin = require('clean-webpack-plugin');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin"); //CSS文件单独提取出来
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports={
 	entry:{
@@ -47,9 +48,9 @@ module.exports={
 					priority:100,
 					// enforce: true?
 				},
-				vendors:{
+				common:{
 					chunks:"all",
-					test:/[\\/]src[\\/]vendors[\\/]/,//也可以值文件/[\\/]src[\\/]js[\\/].*\.js/,  
+					test:/[\\/]src[\\/]/,//也可以值文件/[\\/]src[\\/]js[\\/].*\.js/,  
 					name: "common", //生成文件名，依据output规则
 					minChunks: 1,
 					maxInitialRequests: 5,
@@ -76,7 +77,7 @@ module.exports={
     	{
     		test: /\.css$/,
 	        use: [{ 
-	            loader:"style-loader" ,// MiniCssExtractPlugin.loader, //
+	            loader:MiniCssExtractPlugin.loader, //"style-loader" ,// 
 	        },{ 
 	            loader: "css-loader" 
 	        },{
@@ -107,20 +108,32 @@ module.exports={
 		}]
     },
     plugins:[
-	    // new CleanWebpackPlugin(['dist']),
-
+	    new CleanWebpackPlugin(['dist']),
+		new HtmlWebpackPlugin({
+	    	title: '国际医疗器械设计大会',
+	    	template: 'index.html' //模板文件
+	    }),
         //CopyWebpackPlugin
 
         //删除无用代码
         //PurifyCSSPlugin //用于css的tree-shaking
 
-        //似乎并没有什么用，发布时包含在js里有问题吗??
-		// new MiniCssExtractPlugin({
+        //似乎并没有什么用，发布时包含在js里有问题吗??--太大
+		new MiniCssExtractPlugin({
 			// Options similar to the same options in webpackOptions.output
 			// both options are optional（随意）
-		// 	filename: "styles.css",
-		// 	chunkFilename: "[id].css"
-		// })
+			filename: "[name].css",
+			chunkFilename: "[id].css"
+		}),
+
+		//这些变量不必再import了
+        new webpack.ProvidePlugin({
+            $:'jquery',
+            React:'react',
+            Component:['react','Component'],
+            PureComponent:['react','PureComponent'],
+            ReactDOM:'react-dom'
+        }),
 
   	]
 
